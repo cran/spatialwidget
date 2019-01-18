@@ -4,140 +4,38 @@
 #include <Rcpp.h>
 
 #include "geojsonsf/geojsonsf.h"
-#include "geojsonsf/utils/utils.hpp"
 #include "geojsonsf/geometries/sizes.hpp"
+#include "geojsonsf/write_geojson.hpp"
+#include "geojsonsf/geojson/write_geometry.hpp"
 
 #include "jsonify/jsonify.hpp"
-#include "jsonify/to_json/dataframe.hpp"
-
-#include "spatialwidget/geojson/write_geojson.hpp"
-
+#include "jsonify/to_json/writers/simple.hpp"
+//#include "jsonify/to_json/dataframe.hpp"
 
 namespace spatialwidget {
 namespace geojson {
 
-  inline void cls_check( Rcpp::CharacterVector& cls ) {
-    if (cls.size() != 3 ) {
-      Rcpp::stop("unknown sf class");
-    }
-  }
-
-  template< typename Writer >
-  inline void write_geometry(Writer& writer, SEXP sfg, Rcpp::CharacterVector& cls ) {
-
-    std::string geom_type;
-    geom_type = cls[1];
-
-    int sfglength = geojsonsf::utils::get_sexp_length( sfg );
-
-    if (sfglength == 0) {
-      writer.Null();
-    } else {
-
-      bool isnull = geojsonsf::utils::is_null_geometry( sfg, geom_type );
-      if ( isnull ) {
-        writer.Null();
-      } else {
-        geojsonsf::writers::begin_geojson_geometry(writer, geom_type);
-        write_geojson(writer, sfg, geom_type, cls );
-        geojsonsf::writers::end_geojson_geometry( writer, geom_type );
-      }
-    }
-  }
-
-  template< typename Writer >
-  inline void write_geometry(Writer& writer, Rcpp::List& sfc, int i) {
-
-    SEXP sfg = sfc[ i ];
-
-    std::string geom_type;
-    Rcpp::CharacterVector cls = geojsonsf::getSfClass(sfg);
-    cls_check( cls );
-    geom_type = cls[1];
-
-    // need to keep track of GEOMETRYCOLLECTIONs so we can correctly close them
-    bool isGeometryCollection = (geom_type == "GEOMETRYCOLLECTION") ? true : false;
-
-    int sfglength = geojsonsf::utils::get_sexp_length( sfg );
-
-    if (sfglength == 0) {
-      writer.Null();
-    } else {
-
-      bool isnull = geojsonsf::utils::is_null_geometry( sfg, geom_type );
-      if ( isnull ) {
-        writer.Null();
-      } else {
-        geojsonsf::writers::begin_geojson_geometry(writer, geom_type);
-        write_geojson(writer, sfg, geom_type, cls );
-
-        geom_type = (isGeometryCollection) ? "GEOMETRYCOLLECTION" : geom_type;
-        geojsonsf::writers::end_geojson_geometry( writer, geom_type );
-      }
-    }
-  }
-
-  template< typename Writer >
-  inline void write_geometry(Writer& writer, Rcpp::List& sfc, int i, int geometry,
-                      std::string& geom_type, Rcpp::CharacterVector& cls ) {
-
-    SEXP sfg = sfc[ i ];
-    std::string downcast_geometry;
-
-    if ( geom_type == "MULTIPOINT") {
-      downcast_geometry = "POINT";
-    } else if ( geom_type == "MULTILINESTRING" ) {
-      downcast_geometry = "LINESTRING";
-    } else if ( geom_type == "MULTIPOLYGON" ) {
-      downcast_geometry = "POLYGON";
-    } else {
-      downcast_geometry = geom_type;
-    }
-
-    // need to keep track of GEOMETRYCOLLECTIONs so we can correctly close them
-    bool isGeometryCollection = (geom_type == "GEOMETRYCOLLECTION") ? true : false;
-
-    int sfglength = geojsonsf::utils::get_sexp_length( sfg );
-
-    if (sfglength == 0) {
-      writer.Null();
-    } else {
-
-      bool isnull = geojsonsf::utils::is_null_geometry( sfg, geom_type );
-      if ( isnull ) {
-        writer.Null();
-      } else {
-
-        geojsonsf::writers::begin_geojson_geometry( writer, downcast_geometry );
-        write_geojson( writer, sfg, geom_type, cls, geometry );
-
-        geom_type = (isGeometryCollection) ? "GEOMETRYCOLLECTION" : geom_type;
-        geojsonsf::writers::end_geojson_geometry( writer, downcast_geometry );
-      }
-    }
-  }
-
-
   /*
-  * a variation on the atomise function to return an array of atomised features
-  */
+   * a variation on the atomise function to return an array of atomised features
+   */
   inline Rcpp::StringVector to_geojson_atomise(
       Rcpp::DataFrame& sf,
-      Rcpp::StringVector& geometries ) {
+      Rcpp::StringVector& geometries,
+      int digits) {
 
     int n_geometries = geometries.size();
     int geom;
 
-    size_t n_cols = sf.ncol();
-    size_t n_properties = n_cols - n_geometries;
-    size_t n_rows = sf.nrows();
-    size_t i, j;
+    int n_cols = sf.ncol();
+    int n_properties = n_cols - n_geometries;
+    int n_rows = sf.nrows();
+    int i, j;
     Rcpp::StringVector column_names = sf.names();
     Rcpp::StringVector property_names( n_properties );
 
     int property_counter = 0;
 
-    for (int i = 0; i < sf.length(); i++) {
+    for ( i = 0; i < sf.length(); i++) {
       Rcpp::String this_column = column_names[i];
       int idx = spatialwidget::utils::where::where_is( this_column, geometries );
 
@@ -165,8 +63,9 @@ namespace geojson {
 
         SEXP this_vec = sf[ h ];
 
-        jsonify::writers::write_value( writer, h );
-        jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+        writer.String( h );
+        // jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+        jsonify::writers::simple::write_value( writer, this_vec, i, -1, false, true );
       }
       writer.EndObject();
 
@@ -178,7 +77,7 @@ namespace geojson {
 
         writer.String( geom_column );
         Rcpp::List sfc = sf[ geom_column ];
-        write_geometry( writer, sfc, i );
+        geojsonsf::write_geometry::write_geometry( writer, sfc, i, digits );
       }
 
       writer.EndObject();
@@ -195,22 +94,24 @@ namespace geojson {
   // only for one-column sfc objects
   inline Rcpp::StringVector to_geojson_downcast_atomise(
       Rcpp::DataFrame& sf,
-      std::string geometry ) {
+      std::string geometry,
+      int digits ) {
+
 
     const char* geom_column = geometry.c_str();
 
-    size_t n_cols = sf.ncol();
-    size_t n_properties = n_cols - 1;  // single geometry column
-    size_t n_rows = sf.nrows();
-    size_t i, j, i_geometry;
+    int n_cols = sf.ncol();
+    int n_properties = n_cols - 1;  // single geometry column
+    int n_rows = sf.nrows();
+    int i, j, i_geometry;
     Rcpp::StringVector column_names = sf.names();
     Rcpp::StringVector property_names(sf.size() - 1);
 
-    size_t property_multiplier = 0;
+    int property_multiplier = 0;
     std::string geom_type;
     Rcpp::CharacterVector cls;
 
-    size_t property_counter = 0;
+    int property_counter = 0;
     for ( i = 0; i < n_cols; i++ ) {
 
       Rcpp::String this_column = column_names[i];
@@ -231,7 +132,7 @@ namespace geojson {
       SEXP sfg = sfc[ i ];
 
       cls = geojsonsf::getSfClass(sfg);
-      cls_check( cls );
+      geojsonsf::write_geometry::cls_check( cls );
       geom_type = cls[1];
 
       if ( geom_type == "GEOMETRYCOLLECTION" ) {
@@ -254,8 +155,8 @@ namespace geojson {
 
           SEXP this_vec = sf[ h ];
 
-          jsonify::writers::write_value( writer, h );
-          jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+          writer.String( h );
+          jsonify::writers::simple::write_value( writer, this_vec, i, -1, false, true  );
         }
         writer.EndObject();
 
@@ -263,7 +164,7 @@ namespace geojson {
         writer.StartObject();
 
         writer.String( geom_column );
-        write_geometry( writer, sfc, i, i_geometry, geom_type, cls );
+        geojsonsf::write_geometry::write_geometry( writer, sfc, i, i_geometry, geom_type, cls, digits );
 
         writer.EndObject();
         writer.EndObject();
@@ -277,30 +178,30 @@ namespace geojson {
     return geojson;
   }
 
-
-  // -----------------------WIP---------------------
   // down-casts MULTIGEOMETRIES to their simpler geometry
   // for two-sfc-columned sf objects
   inline Rcpp::StringVector to_geojson_downcast_atomise(
       Rcpp::DataFrame& sf,
-      Rcpp::StringVector geometries )
-    {
+      Rcpp::StringVector geometries,
+      int digits)
+  {
 
-    size_t n_geometries = geometries.size();
+    int n_geometries = geometries.size();
     if ( n_geometries != 2 ) {
       Rcpp::stop("Only supports 2-column sf objects");
     }
 
-    size_t n_cols = sf.ncol();
-    size_t n_rows = sf.nrows();
-    size_t i, j, geometry, geometry_column;
+    int n_cols = sf.ncol();
+    int n_rows = sf.nrows();
+    int i, j;
+    int geometry, geometry_column;
     Rcpp::StringVector column_names = sf.names();
     Rcpp::StringVector property_names(sf.size() - 1);
 
     std::string geom_type;
     Rcpp::CharacterVector cls;
 
-    size_t property_counter = 0;
+    int property_counter = 0;
     for ( i = 0; i < n_cols; i++) {
 
       Rcpp::String this_column = column_names[i];
@@ -319,7 +220,7 @@ namespace geojson {
     for( i = 0; i < n_rows; i++ ) {
 
       int geometry_size = 0;
-      size_t row_multiplier = 0;
+      int row_multiplier = 0;
       Rcpp::IntegerVector geometry_sizes( n_geometries );
 
       for ( geometry = 0; geometry < n_geometries; geometry++ ) {
@@ -330,7 +231,7 @@ namespace geojson {
         SEXP sfg = sfc[ i ];
 
         cls = geojsonsf::getSfClass(sfg);
-        cls_check( cls );
+        geojsonsf::write_geometry::cls_check( cls );
         geom_type = cls[1];
 
         if ( geom_type == "GEOMETRYCOLLECTION" ) {
@@ -375,8 +276,9 @@ namespace geojson {
 
           SEXP this_vec = sf[ h ];
 
-          jsonify::writers::write_value( writer, h );
-          jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+          writer.String( h );
+          //jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+          jsonify::writers::simple::write_value( writer, this_vec, i, -1, false, true );
         }
         writer.EndObject();
 
@@ -393,12 +295,12 @@ namespace geojson {
           SEXP sfg = sfc[ i ];
 
           cls = geojsonsf::getSfClass(sfg);
-          cls_check( cls );
+          geojsonsf::write_geometry::cls_check( cls );
           geom_type = cls[1];
 
           writer.String( geom_column );
           int geometry_index = geometry_indeces(geometry, geometry_column) - 1;
-          write_geometry( writer, sfc, i, geometry_index, geom_type, cls);
+          geojsonsf::write_geometry::write_geometry( writer, sfc, i, geometry_index, geom_type, cls, digits);
         }
 
         writer.EndObject();
@@ -412,21 +314,20 @@ namespace geojson {
     geojson.attr("class") = Rcpp::CharacterVector::create("json");
     return geojson;
   }
-  // -----------------------WIP---------------------
 
 
   /*
    * converts 'sf' object to standard GeoJSON
    */
-  inline Rcpp::StringVector to_geojson( Rcpp::DataFrame& sf, std::string geom_column ) {
+  inline Rcpp::StringVector to_geojson( Rcpp::DataFrame& sf, std::string geom_column, int digits ) {
 
     rapidjson::StringBuffer sb;
     rapidjson::Writer < rapidjson::StringBuffer > writer( sb );
 
-    size_t n_cols = sf.ncol();
-    size_t n_properties = n_cols - 1;
-    size_t n_rows = sf.nrows();
-    size_t i, j;
+    int n_cols = sf.ncol();
+    int n_properties = n_cols - 1;
+    int n_rows = sf.nrows();
+    int i, j;
     Rcpp::StringVector column_names = sf.names();
     Rcpp::StringVector property_names(sf.size() - 1);
 
@@ -456,14 +357,15 @@ namespace geojson {
 
         SEXP this_vec = sf[ h ];
 
-        jsonify::writers::write_value( writer, h );
-        jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+        writer.String( h );
+        //jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+        jsonify::writers::simple::write_value( writer, this_vec, i, -1, false, true  );
       }
       writer.EndObject();
 
       writer.String("geometry");
       Rcpp::List sfc = sf[ geom_column ];
-      write_geometry( writer, sfc, i );
+      geojsonsf::write_geometry::write_geometry( writer, sfc, i, digits );
 
       writer.EndObject();
     }
@@ -479,20 +381,21 @@ namespace geojson {
   // list of geometries is designed for lon & lat columns of data
   inline Rcpp::StringVector to_geojson_atomise(
       Rcpp::DataFrame& df,
-      Rcpp::List& geometries ) // i.e., list(origin = c("start_lon", "start_lat", destination = c("end_lon", "end_lat")))
+      Rcpp::List& geometries, // i.e., list(origin = c("start_lon", "start_lat", destination = c("end_lon", "end_lat")))
+      int digits )
   {
 
-    size_t n_cols = df.ncol();
-    size_t n_rows = df.nrows();
+    int n_cols = df.ncol();
+    int n_rows = df.nrows();
 
-    size_t n_lons = geometries.size();
-    size_t n_lats = geometries.size();  // it is expected the lon & lat data is the same size because
+    int n_lons = geometries.size();
+    int n_lats = geometries.size();  // it is expected the lon & lat data is the same size because
 
-    size_t n_lonlat = n_lons + n_lats;
-    size_t n_properties = n_cols - n_lonlat; // LON & LAT columns
+    int n_lonlat = n_lons + n_lats;
+    int n_properties = n_cols - n_lonlat; // LON & LAT columns
 
     // it comes as columns on a data.frame
-    size_t i, j;
+    int i, j;
     Rcpp::StringVector lons( n_lons );  // the first elements of each 'geometry'
     Rcpp::StringVector lats( n_lats );
 
@@ -535,39 +438,40 @@ namespace geojson {
 
     for( i = 0; i < n_rows; i++ ) {
 
-        writer.StartObject();
-        geojsonsf::writers::start_features( writer );
-        geojsonsf::writers::start_properties( writer );
+      writer.StartObject();
+      geojsonsf::writers::start_features( writer );
+      geojsonsf::writers::start_properties( writer );
 
-        writer.StartObject();
+      writer.StartObject();
 
-        // properties first, then sfc
-        for( j = 0; j < n_properties; j++ ) {
-          const char *h = property_names[ j ];
-          SEXP this_vec = df[ h ];
+      // properties first, then sfc
+      for( j = 0; j < n_properties; j++ ) {
+        const char *h = property_names[ j ];
+        SEXP this_vec = df[ h ];
 
-          jsonify::writers::write_value( writer, h );
-          jsonify::dataframe::dataframe_cell( writer, this_vec, i );
-        }
+        writer.String( h );
+        //jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+        jsonify::writers::simple::write_value( writer, this_vec, i, -1, false, true );
+      }
 
-        writer.EndObject();
+      writer.EndObject();
 
-        writer.String("geometry");
+      writer.String("geometry");
 
-        writer.StartObject();
-        for ( j = 0; j < n_lons; j++ ) {
-          const char* this_lon = lons[j];
-          const char* this_lat = lats[j];
-          Rcpp::NumericVector nv_lon = df[this_lon];
-          Rcpp::NumericVector nv_lat = df[this_lat];
-          SEXP sfg = Rcpp::NumericVector::create( nv_lon[i], nv_lat[i] );
+      writer.StartObject();
+      for ( j = 0; j < n_lons; j++ ) {
+        const char* this_lon = lons[j];
+        const char* this_lat = lats[j];
+        Rcpp::NumericVector nv_lon = df[this_lon];
+        Rcpp::NumericVector nv_lat = df[this_lat];
+        SEXP sfg = Rcpp::NumericVector::create( nv_lon[i], nv_lat[i] );
 
-          writer.String( geometry_names[j] );
+        writer.String( geometry_names[j] );
 
-          write_geometry( writer, sfg, cls );
-        }
-        writer.EndObject();
-        writer.EndObject();
+        geojsonsf::write_geometry::write_geometry( writer, sfg, cls, digits );
+      }
+      writer.EndObject();
+      writer.EndObject();
     }
     writer.EndArray();
 
@@ -580,21 +484,22 @@ namespace geojson {
   // list of geometries is designed for lon & lat & z columns of data
   inline Rcpp::StringVector to_geojson_z_atomise(
       Rcpp::DataFrame& df,
-      Rcpp::List& geometries ) // i.e., list(origin = c("start_lon", "start_lat", destination = c("end_lon", "end_lat")))
+      Rcpp::List& geometries, // i.e., list(origin = c("start_lon", "start_lat", destination = c("end_lon", "end_lat")))
+      int digits )
   {
 
-    size_t n_cols = df.ncol();
-    size_t n_rows = df.nrows();
+    int n_cols = df.ncol();
+    int n_rows = df.nrows();
 
-    size_t n_lons = geometries.size();
-    size_t n_lats = geometries.size();  // it is expected the lon & lat data is the same size because
-    size_t n_elevs = geometries.size();
+    int n_lons = geometries.size();
+    int n_lats = geometries.size();  // it is expected the lon & lat data is the same size because
+    int n_elevs = geometries.size();
 
-    size_t n_lonlat = n_lons + n_lats + n_elevs;
-    size_t n_properties = n_cols - n_lonlat; // LON & LAT & ELEV columns
+    int n_lonlat = n_lons + n_lats + n_elevs;
+    int n_properties = n_cols - n_lonlat; // LON & LAT & ELEV columns
 
     // it comes as columns on a data.frame
-    size_t i, j;
+    int i, j;
     Rcpp::StringVector lons( n_lons );  // the first elements of each 'geometry'
     Rcpp::StringVector lats( n_lats );
     Rcpp::StringVector elevs( n_elevs );
@@ -625,7 +530,7 @@ namespace geojson {
 
     int property_counter = 0;
 
-    for (int i = 0; i < df.length(); i++) {
+    for ( i = 0; i < df.length(); i++) {
 
       Rcpp::String this_column = column_names[i];
 
@@ -660,8 +565,9 @@ namespace geojson {
 
           SEXP this_vec = df[ h ];
 
-          jsonify::writers::write_value( writer, h );
-          jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+          writer.String( h );
+          //jsonify::dataframe::dataframe_cell( writer, this_vec, i );
+          jsonify::writers::simple::write_value( writer, this_vec, i, -1, false, true  );
         }
         writer.EndObject();
       }
@@ -684,7 +590,7 @@ namespace geojson {
 
         writer.String( geometry_names[j] );
 
-        write_geometry( writer, sfg, cls );
+        geojsonsf::write_geometry::write_geometry( writer, sfg, cls, digits );
       }
       writer.EndObject();
 

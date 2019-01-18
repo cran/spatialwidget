@@ -31,7 +31,7 @@ or a single value to apply to all rows of data}
 \item{json_legend}{logical indicating if the legend will be returned as json}
 }
 \description{
-Converts an `sf` object with POLYGON geometries into JSON for plotting in an htmlwidget
+Converts an `sf` object with POLYGON geometriers into JSON for plotting in an htmlwidget
 }
 \examples{
 

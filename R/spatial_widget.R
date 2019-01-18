@@ -1,6 +1,6 @@
 #' Widget Line
 #'
-#' Converts an `sf` object with LINESTRING geometries into JSON for plotting in an htmlwidget
+#' Converts an `sf` object with LINESTRING geometriers into JSON for plotting in an htmlwidget
 #'
 #' @param data \code{sf} object
 #' @param stroke_colour string specifying column of \code{sf} to use for the stroke colour,
@@ -42,16 +42,14 @@ widget_line <- function( data,
   }
   l[["data_type"]] <- NULL
 
-  data_types <- vapply( data, function(x) class(x)[[1]], "")
-
-  js_data <- rcpp_widget_line( data, data_types, l, c("geometry"), json_legend  )
+  js_data <- rcpp_widget_line( data, l, c("geometry"), json_legend  )
   return( js_data )
 }
 
 
 #' Widget Polygon
 #'
-#' Converts an `sf` object with POLYGON geometries into JSON for plotting in an htmlwidget
+#' Converts an `sf` object with POLYGON geometriers into JSON for plotting in an htmlwidget
 #'
 #' @inheritParams widget_line
 #' @param fill_colour string specifying column of \code{sf} to use for the fill colour,
@@ -93,16 +91,14 @@ widget_polygon <- function( data,
   }
   l[["data_type"]] <- NULL
 
-  data_types <- vapply( data, function(x) class(x)[[1]], "" )
-
-  js_data <- rcpp_widget_polygon( data, data_types, l, c("geometry"), json_legend )
+  js_data <- rcpp_widget_polygon( data, l, c("geometry"), json_legend )
   return( js_data )
 }
 
 
 #' Widget Point
 #'
-#' Converts an `sf` object with POINT geometries into JSON for plotting in an htmlwidget
+#' Converts an `sf` object with POINT geometriers into JSON for plotting in an htmlwidget
 #'
 #' @inheritParams widget_polygon
 #' @param lon string specifying the column of \code{data} containing the longitude.
@@ -140,18 +136,17 @@ widget_point <- function( data,
     l[["data"]] <- NULL
   }
 
-  data_types <- vapply( data, function(x) class(x)[[1]], "")
   tp <- l[["data_type"]]
   l[["data_type"]] <- NULL
 
   if( tp == "sf" ) {
-    js_data <- rcpp_widget_point( data, data_types, l, c("geometry"), json_legend )
+    js_data <- rcpp_widget_point( data, l, c("geometry"), json_legend )
   } else if (tp == "df" ) {
     if( is.null( lon ) || is.null( lat ) ) {
       stop("lon and lat are requried for data.frames")
     }
     js_data <- rcpp_widget_point_df(
-      data, data_types, l, list(myGeometry = c("lon","lat") ), json_legend
+      data, l, list(myGeometry = c("lon","lat") ), json_legend
       )
   }
   return( js_data )
@@ -160,7 +155,7 @@ widget_point <- function( data,
 
 #' Widget OD
 #'
-#' Converts an `sf` object with two POINT geometries into JSON for plotting in an htmlwidget
+#' Converts an `sf` object with two POINT geometriers into JSON for plotting in an htmlwidget
 #'
 #' @inheritParams widget_polygon
 #' @param origin string specifying the column of \code{data} containing the origin geometry
@@ -192,11 +187,10 @@ widget_od <- function( data,
     l[["data"]] <- NULL
   }
 
-  data_types <- vapply( data, function(x) class(x)[[1]], "")
   tp <- l[["data_type"]]
   l[["data_type"]] <- NULL
 
-  js_data <- rcpp_widget_point( data, data_types, l, c("origin","destination"), json_legend )
+  js_data <- rcpp_widget_point( data, l, c("origin","destination"), json_legend )
 
   return( js_data )
 }

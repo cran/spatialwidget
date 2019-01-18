@@ -27,7 +27,7 @@ Ignored if using an \code{sf} object}
 \item{json_legend}{logical indicating if the legend will be returned as json}
 }
 \description{
-Converts an `sf` object with POINT geometries into JSON for plotting in an htmlwidget
+Converts an `sf` object with POINT geometriers into JSON for plotting in an htmlwidget
 }
 \examples{
 

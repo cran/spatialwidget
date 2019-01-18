@@ -5,7 +5,6 @@ knitr::opts_chunk$set(
 )
 
 library(spatialwidget)
-library(jsonlite)
 library(sf)
 library(geojsonsf)
 
@@ -37,11 +36,6 @@ l <- widget_polygon( widget_melbourne[1:2, ], fill_colour = "AREASQKM16", legend
 substr( l$data, 1, 200 )
 
 ## ------------------------------------------------------------------------
-df <- data.frame(id = 1:5, val = letters[1:5])
-data_types <- vapply( df, function(x) class(x)[[1]], "")
-data_types
-
-## ------------------------------------------------------------------------
 feat1 <- '{"type":"Feature","properties":{"id":1},"geometry":{"type":"Point","coordinates":[0,0]}}'
 feat2 <- '{"type":"Feature","properties":{"id":2},"geometry":{"type":"Point","coordinates":[1,1]}}'
 geojson <- paste0('[{"type":"FeatureCollection","features":[',feat1,',',feat2,']}]')
@@ -59,7 +53,7 @@ geojsonsf::sf_geojson( sf, atomise = TRUE )
 js <- '{"type":"Feature","properties":{"id":1,"val":"a"},"geometry":{"type":"MultiPoint","coordinates":[[1,4],[2,5],[3,6]]}}'
 sf <- geojsonsf::geojson_sf( js )
 geo_down <- spatialwidget:::rcpp_sf_to_geojson_downcast( sf, "geometry" )
-jsonlite::prettify( geo_down )
+jsonify::pretty_json( geo_down )
 
 ## ------------------------------------------------------------------------
 geojson <- spatialwidget:::rcpp_geojson_sf(sf = widget_arcs, geometries = c("origin","destination"))

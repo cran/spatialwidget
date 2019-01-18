@@ -11,7 +11,7 @@
 
 <meta name="author" content="David Cooley" />
 
-<meta name="date" content="2018-12-14" />
+<meta name="date" content="2019-01-18" />
 
 <title>spatialwidget</title>
 
@@ -1493,7 +1493,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">spatialwidget</h1>
 <h4 class="author"><em>David Cooley</em></h4>
-<h4 class="date"><em>2018-12-14</em></h4>
+<h4 class="date"><em>2019-01-18</em></h4>
 
 </div>
 
@@ -1523,9 +1523,13 @@ div.tocify {
 <pre class="r"><code>js &lt;- spatialwidget::widget_point( data = widget_capitals, fill_colour = &quot;country&quot;, legend = TRUE)
 
 substr( js$data, 1, 200 )
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;fill_colour&quot;:&quot;#440154FF&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;fill_colour&quot;:&quot;#450356FF&quot;},&quot;geometry&quot;:</code></pre>
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#440154FF\&quot;},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#450356FF\&quot;},\&quot;geometry\&quot;:&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 <pre class="r"><code>substr( js$legend, 1, 100 )
-#  {&quot;fill_colour&quot;:{&quot;colour&quot;:[&quot;#440154FF&quot;,&quot;#450356FF&quot;,&quot;#450458FF&quot;,&quot;#45065AFF&quot;,&quot;#46085CFF&quot;,&quot;#460A5EFF&quot;,&quot;#</code></pre>
+#  [1] &quot;{\&quot;fill_colour\&quot;:{\&quot;colour\&quot;:[\&quot;#440154FF\&quot;,\&quot;#450356FF\&quot;,\&quot;#450458FF\&quot;,\&quot;#45065AFF\&quot;,\&quot;#46085CFF\&quot;,\&quot;#460A5EFF\&quot;,\&quot;#&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 <p>Notice the <code>fill_colour</code> column is now a hex colour, and the <code>geometry</code> column has been converted into <code>Point</code> coordinates.</p>
 <p>This is basically it. The R object is now represented as JSON, having had a column of data changed into hex colours.</p>
 <hr />
@@ -1555,21 +1559,27 @@ substr( js$data, 1, 200 )
 <pre class="r"><code>l &lt;- widget_point( widget_capitals[1:2, ], fill_colour = &quot;country&quot;, legend = T )
 
 substr( l$data, 1, 200 )
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;fill_colour&quot;:&quot;#440154FF&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;fill_colour&quot;:&quot;#FDE725FF&quot;},&quot;geometry&quot;:</code></pre>
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#440154FF\&quot;},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#FDE725FF\&quot;},\&quot;geometry\&quot;:&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 </div>
 <div id="lines" class="section level3">
 <h3>Lines</h3>
 <pre class="r"><code>l &lt;- widget_line( widget_roads[1:2, ], stroke_colour = &quot;ROAD_NAME&quot;, legend = T )
 
 substr( l$data, 1, 200 )
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;stroke_colour&quot;:&quot;#440154FF&quot;,&quot;stroke_width&quot;:1.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;LineString&quot;,&quot;coordinates&quot;:[[145.014291,-37.830458],[145.014345,-37.830574],[145.01449,-</code></pre>
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;stroke_colour\&quot;:\&quot;#440154FF\&quot;,\&quot;stroke_width\&quot;:1.0},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;LineString\&quot;,\&quot;coordinates\&quot;:[[145.014291,-37.830458],[145.014345,-37.830574],[145.01449,-&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 </div>
 <div id="polygon" class="section level3">
 <h3>Polygon</h3>
 <pre class="r"><code>l &lt;- widget_polygon( widget_melbourne[1:2, ], fill_colour = &quot;AREASQKM16&quot;, legend = F)
 
 substr( l$data, 1, 200 )
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;stroke_colour&quot;:&quot;#440154FF&quot;,&quot;stroke_width&quot;:1.0,&quot;fill_colour&quot;:&quot;#440154FF&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Polygon&quot;,&quot;coordinates&quot;:[[[144.9925232,-37.8024902],[144.99264</code></pre>
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;stroke_colour\&quot;:\&quot;#440154FF\&quot;,\&quot;stroke_width\&quot;:1.0,\&quot;fill_colour\&quot;:\&quot;#440154FF\&quot;},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Polygon\&quot;,\&quot;coordinates\&quot;:[[[144.9925232,-37.8024902],[144.99264&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 <hr />
 </div>
 </div>
@@ -1588,7 +1598,6 @@ substr( l$data, 1, 200 )
  */
 inline Rcpp::List create_geojson(
     Rcpp::DataFrame&amp; data,
-    Rcpp::List&amp; data_types,
     Rcpp::List&amp; params,
     Rcpp::List&amp; lst_defaults,
     std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
@@ -1611,7 +1620,6 @@ inline Rcpp::List create_geojson(
  */
 inline Rcpp::List create_geojson(
     Rcpp::DataFrame&amp; data,
-    Rcpp::List&amp; data_types,
     Rcpp::List&amp; params,
     Rcpp::List&amp; lst_defaults,
     std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
@@ -1635,7 +1643,6 @@ inline Rcpp::List create_geojson(
  */
 inline Rcpp::List create_geojson_downcast(
     Rcpp::DataFrame&amp; data,
-    Rcpp::List&amp; data_types,
     Rcpp::List&amp; params,
     Rcpp::List&amp; lst_defaults,
     std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
@@ -1659,7 +1666,6 @@ inline Rcpp::List create_geojson_downcast(
    */
   inline Rcpp::List create_geojson_downcast(
       Rcpp::DataFrame&amp; data,
-      Rcpp::List&amp; data_types, // named list, names == data.names(), values == data.class[[1]] ?
       Rcpp::List&amp; params,
       Rcpp::List&amp; lst_defaults,
       std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
@@ -1682,7 +1688,6 @@ inline Rcpp::List create_geojson_downcast(
  */
 inline Rcpp::List create_geojson(
     Rcpp::DataFrame&amp; data,
-    Rcpp::List&amp; data_types,
     Rcpp::List&amp; params,
     Rcpp::List&amp; lst_defaults,
     std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
@@ -1705,7 +1710,6 @@ inline Rcpp::List create_geojson(
  */
 inline Rcpp::List create_geojson(
     Rcpp::DataFrame&amp; data,
-    Rcpp::List&amp; data_types,
     Rcpp::List&amp; params,
     Rcpp::List&amp; lst_defaults,
     std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
@@ -1726,16 +1730,6 @@ inline Rcpp::List create_geojson(
 <div id="rcppdataframe-data" class="section level3">
 <h3>Rcpp::DataFrame data</h3>
 <p>This will either be a data.frame with lon &amp; lat columns, or an <code>sf</code> object.</p>
-</div>
-<div id="rcpplist-data_types" class="section level3">
-<h3>Rcpp::List data_types</h3>
-<p>A named vector. Each name is the columns of <code>data</code>, and the values are the <code>r</code> data types of the column. Only one value per name is accepted. This is used to help determine how the legend values should be formatted.</p>
-<p>An example is</p>
-<pre class="r"><code>df &lt;- data.frame(id = 1:5, val = letters[1:5])
-data_types &lt;- vapply( df, function(x) class(x)[[1]], &quot;&quot;)
-data_types
-#         id       val 
-#  &quot;integer&quot;  &quot;factor&quot;</code></pre>
 </div>
 <div id="rcpplist-params" class="section level3">
 <h3>Rcpp::List params</h3>
@@ -1858,9 +1852,7 @@ widget_point &lt;- function( data,
   l[[&quot;fill_colour&quot;]] &lt;- force( fill_colour )
   l[[&quot;legend&quot;]] &lt;- legend
 
-  data_types &lt;- vapply( data, function(x) class(x)[[1]], &quot;&quot;)
-
-  js_data &lt;- rcpp_widget_point( data, data_types, l, c(&quot;geometry&quot;), json_legend )
+  js_data &lt;- rcpp_widget_point( data, l, c(&quot;geometry&quot;), json_legend )
 
   return( js_data )
 }</code></pre>
@@ -1873,7 +1865,6 @@ widget_point &lt;- function( data,
 // [[Rcpp::export]]
 Rcpp::List rcpp_widget_point(
     Rcpp::DataFrame data,
-    Rcpp::List data_types,
     Rcpp::List params,
     Rcpp::StringVector geometry_columns,
     bool jsonify_legend ) {
@@ -1887,7 +1878,6 @@ Rcpp::List rcpp_widget_point(
 
   return spatialwidget::api::create_geojson(
     data,
-    data_types,
     params,
     defaults,
     point_colours,
@@ -1957,7 +1947,7 @@ geo
 <pre class="r"><code>js &lt;- '{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1,&quot;val&quot;:&quot;a&quot;},&quot;geometry&quot;:{&quot;type&quot;:&quot;MultiPoint&quot;,&quot;coordinates&quot;:[[1,4],[2,5],[3,6]]}}'
 sf &lt;- geojsonsf::geojson_sf( js )
 geo_down &lt;- spatialwidget:::rcpp_sf_to_geojson_downcast( sf, &quot;geometry&quot; )
-jsonlite::prettify( geo_down )
+jsonify::pretty_json( geo_down )
 #  [
 #      {
 #          &quot;type&quot;: &quot;Feature&quot;,
@@ -2007,8 +1997,7 @@ jsonlite::prettify( geo_down )
 #              }
 #          }
 #      }
-#  ]
-#  </code></pre>
+#  ]</code></pre>
 <p>See here we started with a single MULTIPOINT (containing three coordinates), and we are returned three POINTs. Also notice the <code>id</code> and <code>val</code> fields are repeated across the new POINTs.</p>
 </div>
 </div>
@@ -2104,7 +2093,7 @@ substr( geojson, 1, 500 )
 <pre class="r"><code>df$z &lt;- sample(1:500, size = nrow(df), replace = TRUE )
 geojson &lt;- spatialwidget:::rcpp_geojson_dfz( df, geometries = list(geometry = c(&quot;lon&quot;,&quot;lat&quot;,&quot;z&quot;) ) )
 substr( geojson, 1, 500 )
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Afghanistan&quot;,&quot;capital&quot;:&quot;Kabul&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28,398.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Albania&quot;,&quot;capital&quot;:&quot;Tirane&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[19.49,41.18,51.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Algeria&quot;,&quot;capital&quot;:&quot;Algiers&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.08,36.42,56.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;American Sa</code></pre>
+#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Afghanistan&quot;,&quot;capital&quot;:&quot;Kabul&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28,288.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Albania&quot;,&quot;capital&quot;:&quot;Tirane&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[19.49,41.18,447.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Algeria&quot;,&quot;capital&quot;:&quot;Algiers&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.08,36.42,200.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;American</code></pre>
 <p><strong>in</strong> - <code>data.frame</code> with lon, lat and elevation columns</p>
 <p><strong>out</strong> - pseudo-GeoJSON atomised</p>
 </div>

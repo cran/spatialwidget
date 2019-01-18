@@ -24,7 +24,7 @@ or a single value to apply to all rows of data}
 \item{json_legend}{logical indicating if the legend will be returned as json}
 }
 \description{
-Converts an `sf` object with LINESTRING geometries into JSON for plotting in an htmlwidget
+Converts an `sf` object with LINESTRING geometriers into JSON for plotting in an htmlwidget
 }
 \examples{
 
