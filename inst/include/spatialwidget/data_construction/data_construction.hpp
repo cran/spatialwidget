@@ -28,19 +28,22 @@ namespace construction {
    * This assumes the fill and stroke colours have already been resolved and removed
    * from the list of parameters
    */
-  inline Rcpp::DataFrame construct_data(
+  inline SEXP construct_data(
   		Rcpp::StringVector& param_names,
   		Rcpp::List& params,
   		Rcpp::StringVector& data_names,
   		Rcpp::List& lst_defaults,
   		Rcpp::DataFrame& data,
-  		int& data_rows) {
+  		int& data_rows
+  ) {
 
   	int n = params.size();
   	int colIndex = -1;
 
+  	// Rcpp::Rcout << "param_names " << param_names << ", n: " << n << std::endl;
+
   	if (param_names.size() != n ) {
-  	  Rcpp::stop("unsuitable data object");
+  	  Rcpp::stop("spatialwidget - unsuitable data object");
   	}
 
   	// iterate each of the parameters
@@ -48,12 +51,15 @@ namespace construction {
   		// if the param element is length 1; check if it's a column name
 
   		Rcpp::String this_param = param_names[i];
+  	  //Rcpp::Rcout << "this_param: " << this_param.get_cstring() << std::endl;
+  	  //Rcpp::Rcout << "TYPEOF(param) " << TYPEOF( params[i] ) << std::endl;
 
 			if( TYPEOF( params[i] ) == STRSXP ) {
 				// it's a string
 				// is it also a column name
 
 				Rcpp::String param_value = params[i];
+			  //Rcpp::Rcout << "param_value: " << param_value.get_cstring() << std::endl;
 
 				// returns -1 if length != 1
 				colIndex = spatialwidget::utils::where::where_is( param_value, data_names );
@@ -79,6 +85,11 @@ namespace construction {
 			  spatialwidget::utils::fill::fill_vector( lst_defaults, this_param, value, data_rows );
 			}
 		} // TODO( is there an 'else' condition? )
+
+  	Rcpp::StringVector list_names = lst_defaults.names();
+  	//Rcpp::Rcout << "list_names: " << list_names << std::endl;
+
+  	//return lst_defaults;
 
   	construct_df( lst_defaults, data_rows );
   	return lst_defaults;

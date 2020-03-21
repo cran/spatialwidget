@@ -5,7 +5,11 @@
 #include "spatialwidget/spatialwidget.hpp"
 #include "spatialwidget/legend/legend.hpp"
 #include "spatialwidget/colour/colour.hpp"
+#include "spatialwidget/utils/utils.hpp"
 //#include <Rcpp/Benchmark/Timer.h>
+
+// #include "jsonify/to_json/dates/dates.hpp"
+// #include "jsonify/to_json/utils.hpp"
 
 namespace spatialwidget {
 namespace parameters {
@@ -26,10 +30,14 @@ namespace parameters {
    */
   inline Rcpp::List construct_params(
       Rcpp::DataFrame& data,
-      Rcpp::List& params) {
+      Rcpp::List& params
+  ) {
 
     int n_params = params.size();
     Rcpp::StringVector param_names = params.names();
+
+    //Rcpp::Rcout << "param_names " << param_names << std::endl;
+
     Rcpp::IntegerVector parameter_r_types( n_params );
     Rcpp::IntegerVector data_column_index( n_params, -1 );
     Rcpp::StringVector data_names = data.names();
@@ -63,13 +71,30 @@ namespace parameters {
   		std::unordered_map< std::string, std::string > colour_columns,
   		Rcpp::StringVector& layer_legend,     // vector of colours to use in the legend
   		int& data_rows,
-  		Rcpp::StringVector& parameter_exclusions) {
+  		Rcpp::StringVector& parameter_exclusions,
+  		bool factors_as_string = true,
+  		std::string colour_format = "hex"
+  ) {
 
+
+    //Turn factors to strings
+    if (factors_as_string ) {
+      spatialwidget::utils::factors::factors_to_string( data );
+    }
+
+    // convert dates to characters
+    // issue 46 - moved this outside
+    //spatialwidget::utils::dates::dates_to_string( data );
 
   	Rcpp::StringVector param_names = params.names();
   	Rcpp::StringVector data_names = data.names();
 
+  	//Rcpp::Rcout << "param_names " << param_names << std::endl;
+  	//Rcpp::Rcout << "data_names " << data_names << std::endl;
+
   	Rcpp::List lst_params = construct_params( data, params );
+
+  	//return lst_params;
 
   	Rcpp::List lst_legend = spatialwidget::legend::construct_legend_list(
   	  lst_params,
@@ -95,12 +120,15 @@ namespace parameters {
 		  include_legend = spatialwidget::utils::where::where_is( colour_column, legend_names ) >= 0 ? true : false;
 
 	    spatialwidget::colour::resolve_colour(
-	      lst_params, params, data,
+	      lst_params,
+	      params,
+	      data,
 	      lst_defaults,
 	      colour_column,
 	      opacity_column,
 	      lst_legend,
-	      include_legend
+	      include_legend,
+	      colour_format
 	      );
 		}
 
@@ -120,9 +148,10 @@ namespace parameters {
   	spatialwidget::utils::remove::remove_list_elements( params, param_names, colours_remove );
   	spatialwidget::utils::remove::remove_list_elements( params, param_names, layer_legend );
 
-  	lst_params = construct_params( data, params );
+  	//lst_params = construct_params( data, params );
+  	//return lst_params;
 
-  	Rcpp::DataFrame df = spatialwidget::construction::construct_data(
+  	SEXP df = spatialwidget::construction::construct_data(
   		param_names,
   		params,
   		data_names,
@@ -135,6 +164,8 @@ namespace parameters {
   		Rcpp::_["data"] = df,
   		Rcpp::_["legend"] = lst_legend
   	);
+
+  	//Rcpp::Rcout << "parameters.hpp done" << std::endl;
 
   	return result;
   }

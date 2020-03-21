@@ -12,47 +12,6 @@ namespace colour {
 
   const std::string default_na_colour = "#808080FF";
 
-  inline bool is_in( const char* x, Rcpp::CharacterVector v ) {
-    int n = v.size();
-    int i;
-    for( i = 0; i < n; i++ ) {
-      if( v[i] == x ) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  template < int RTYPE >
-  inline Rcpp::CharacterVector rClass( Rcpp::Vector< RTYPE > v ) {
-    if( Rf_isNull( v.attr("class")) ) {
-      return "";
-    }
-    return v.attr("class");
-  }
-
-  inline Rcpp::CharacterVector getRClass( SEXP obj ) {
-
-    switch( TYPEOF( obj ) ) {
-    case REALSXP:
-      return rClass< REALSXP >( obj );
-      //return "numeric";
-    case VECSXP:
-      return rClass< VECSXP >( obj );
-      //return "character";
-    case INTSXP:
-      return rClass< INTSXP >( obj );
-      //return "numeric";
-    case LGLSXP:
-      //return rClass< LGLSXP >( obj );
-      return "logical";
-    case STRSXP:
-      //return rClass< STRSXP >( obj );
-      return "character";
-    }
-    return "";
-  }
-
   inline Rcpp::List make_colours(
       Rcpp::List& lst_params,
       Rcpp::List& params,
@@ -62,7 +21,10 @@ namespace colour {
       SEXP& palette_type,
       Rcpp::NumericVector& alpha,
       std::string& colour_name,
-      bool& include_legend) {
+      bool& include_legend,
+      int legend_digits = 2,
+      std::string colour_format = "hex"
+    ) {
 
     std::string na_colour = params.containsElementNamed( "na_colour" ) ?
     params["na_colour"] : default_na_colour;
@@ -74,26 +36,18 @@ namespace colour {
     std::string format_type;
 
     if ( col_index == -1 ) {
-
       palette_type = lst_defaults[ colour_name.c_str() ];
-      //format_type = "numeric";
-
     } else {
       Rcpp::String this_colour = params[ colour_name.c_str() ];
-
-      // Rcpp::StringVector sv_r_type;
-      // Rcpp::String rs_format_type;
-      //
-      // sv_r_type = data_types[ this_colour ];
-      // rs_format_type = sv_r_type[0];
-      // format_type = rs_format_type;
     }
+
+    // here it's already a STRSXP, not factor (INTSXP)
+    //Rcpp::Rcout << "palette_type: " << TYPEOF( palette_type ) << std::endl;
 
     switch ( TYPEOF( palette_type ) ) {
     case STRSXP: {} // string vector
     case LGLSXP: {  // logical vector
       Rcpp::StringVector colour_vec = Rcpp::as< Rcpp::StringVector >( palette_type );
-      // TODO( if colour_vec is hex_strings, assume the user passed-in the colours they want to use? )
       Rcpp::String first_colour = colour_vec[0];
       std::string first_colour_str = first_colour;
       if ( spatialwidget::utils::colour::is_hex( first_colour_str ) ) {
@@ -106,6 +60,15 @@ namespace colour {
           _["summary_colours"] = lvls
         );
 
+        if( colour_format == "rgb" ) {
+          Rcpp::IntegerMatrix colour_mat = colourvalues::convert::convert_hex_to_rgb( colour_vec );
+          Rcpp::IntegerMatrix colour_mat_lvls = colourvalues::convert::convert_hex_to_rgb( lvls );
+
+          legend["colours"] = colour_mat;
+          legend["summary_colours"] = colour_mat_lvls;
+        }
+
+
         if ( include_legend ) {
           legend[ "colour_type" ] = colour_name;
           legend[ "type" ] = "category";
@@ -113,37 +76,42 @@ namespace colour {
         return legend;
 
       } else {
-        Rcpp::List legend = spatialwidget::palette::colour_with_palette( pal, colour_vec, alpha, na_colour, include_alpha, colour_name );
 
+        Rcpp::List legend = spatialwidget::palette::colour_with_palette(
+          pal, palette_type, alpha, na_colour, include_alpha, colour_name, legend_digits, colour_format
+        );
+
+        // Rcpp::List legend = spatialwidget::palette::colour_with_palette(
+        //   pal, colour_vec, alpha, na_colour, include_alpha, colour_name
+        // );
+
+        // TODO
+        // - if numeric, it's 'gradient', else 'category'
+        // - but factor needs to be category
         if ( include_legend ) {
           legend[ "colour_type" ] = colour_name;
           legend[ "type" ] = "category";
         }
         return legend;
-      }
+     }
       break;
     }
     default: {
 
-      Rcpp::CharacterVector cls = getRClass( palette_type );
-      if( is_in( "Date", cls ) ) {
-        format_type = "Date";
-      } else if ( is_in("POSIXct", cls) ) {
-        format_type = "POSIXct";
-      } else if ( is_in("logical", cls) ) {
-        format_type = "logical";
-      } else if ( is_in("character", cls) ) {
-        format_type = "character";
-      } else {
-        format_type = "numeric";
-      }
+      // Rcpp::NumericVector colour_vec = Rcpp::as< Rcpp::NumericVector >( palette_type );
+      // Rcpp::List legend = spatialwidget::palette::colour_with_palette(
+      //   pal, colour_vec, alpha, na_colour, include_alpha, colour_name,
+      //   legend_digits
+      //   );
+      Rcpp::List legend = spatialwidget::palette::colour_with_palette(
+        pal, palette_type, alpha, na_colour, include_alpha, colour_name, legend_digits, colour_format
+      );
 
-      Rcpp::NumericVector colour_vec = Rcpp::as< Rcpp::NumericVector >( palette_type );
-      Rcpp::List legend = spatialwidget::palette::colour_with_palette( pal, colour_vec, alpha, na_colour, include_alpha, colour_name, format_type );
+      std::string legend_type = Rf_isFactor( palette_type )  ? "category" : "gradient";
 
       if ( include_legend ) {
         legend[ "colour_type" ] = colour_name;
-        legend[ "type" ] = "gradient";
+        legend[ "type" ] = legend_type;
       }
       return legend;
       break;
@@ -159,7 +127,10 @@ namespace colour {
       std::string& colour_name,
       std::string& opacity_name,
       Rcpp::List& lst_legend,
-      bool& include_legend ) {
+      bool& include_legend,
+      std::string colour_format = "hex"
+      //int legend_digits = 2
+    ) {
 
     Rcpp::IntegerVector data_column_index = lst_params[ "data_column_index" ];
     Rcpp::IntegerVector parameter_type = lst_params[ "parameter_type" ];
@@ -208,39 +179,63 @@ namespace colour {
       }
     }
 
-    Rcpp::List legend = make_colours(
-      lst_params, params, data, lst_defaults, colourColIndex, //data_column_index, //hex_strings,
-      this_colour, alpha, colour_name, include_legend
-    );
+    // TODO
+    // get the 'legend_digits' before here so it goes into colourvalues
+    //
+
+
 
     // this can't be replaced with 'include_legend'
     bool make_legend = false;
+    int legend_digits = 2;
+    std::string title;
+    std::string css;
+    std::string legend_digits_str = std::to_string( legend_digits );
 
     if ( lst_legend.containsElementNamed( colour_name.c_str() ) ) {
       make_legend = lst_legend[ colour_name.c_str() ];
     }
 
-    lst_defaults[ colour_name.c_str() ] = legend[ "colours" ];
-
     if (lst_legend.containsElementNamed( colour_name.c_str() ) ) {
 
-      if (  make_legend == true ) {
+      if ( make_legend == true ) {
 
         SEXP t = params[ colour_name ];
         Rcpp::StringVector sv = Rcpp::as< Rcpp::StringVector >( t );
         Rcpp::String s = sv[0];
-        std::string title = s;
-        std::string css = "";
+        title = s;
+        css = "";
+        //int legend_digits;
 
         if ( params.containsElementNamed("legend_options") ) {
 
           Rcpp::List opts = params[ "legend_options" ];
           std::string title_string = "title";
           std::string css_string = "css";
+          std::string digits_string = "digits";
+
           spatialwidget::legend::set_legend_option( opts, title_string, title, colour_name );
           spatialwidget::legend::set_legend_option( opts, css_string, css, colour_name );
+          //Rcpp::Rcout << "legend_digits_str " << legend_digits_str << std::endl;
+          spatialwidget::legend::set_legend_option( opts, digits_string, legend_digits_str, colour_name );
+          //Rcpp::Rcout << "setting legend digits " << std::endl;
+          legend_digits = std::stoi( legend_digits_str );
         }
+      }
+    }
 
+    // make colours returns a summary anyway. Whether or not it's included
+    // on the map is determined by `make_legend` check
+    // since colourvalues controls the summary values, we need 'legend_digits'
+    // known here before it goes into 'make_colours' and then into colourvalues
+    Rcpp::List legend = make_colours(
+      lst_params, params, data, lst_defaults, colourColIndex, //data_column_index, //hex_strings,
+      this_colour, alpha, colour_name, include_legend, legend_digits, colour_format
+    );
+
+    if (lst_legend.containsElementNamed( colour_name.c_str() ) ) {
+
+      if ( make_legend == true ) {
         Rcpp::List summary = Rcpp::List::create(
           Rcpp::_["colour"] = legend[ "summary_colours" ],
           Rcpp::_["variable"] = legend[ "summary_values" ],
@@ -252,6 +247,9 @@ namespace colour {
         lst_legend[ colour_name ] = summary;
       }
     }
+
+    lst_defaults[ colour_name.c_str() ] = legend[ "colours" ];
+
   }
 
 

@@ -7,11 +7,12 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 <meta name="author" content="David Cooley" />
 
-<meta name="date" content="2019-01-18" />
+<meta name="date" content="2020-03-21" />
 
 <title>spatialwidget</title>
 
@@ -87,8 +88,6 @@ overflow: auto;
 margin-left: 2%;
 position: fixed;
 border: 1px solid #ccc;
-webkit-border-radius: 6px;
-moz-border-radius: 6px;
 border-radius: 6px;
 }
 
@@ -116,9 +115,14 @@ font-size: 12px;
 .tocify-subheader .tocify-subheader {
 text-indent: 30px;
 }
-
 .tocify-subheader .tocify-subheader .tocify-subheader {
 text-indent: 40px;
+}
+.tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader {
+text-indent: 50px;
+}
+.tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader {
+text-indent: 60px;
 }
 
 .tocify .tocify-item > a, .tocify .nav-list .nav-header {
@@ -522,13 +526,13 @@ float: none;
 
           item.append($("<a/>", {
 
-            "text": self.text()
+            "html": self.html()
 
           }));
 
         } else {
 
-          item.text(self.text());
+          item.html(self.html());
 
         }
 
@@ -1345,9 +1349,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type="text/css">
 .main-container {
@@ -1361,7 +1363,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -1372,50 +1373,72 @@ img {
 button.code-folding-btn:focus {
   outline: none;
 }
+summary {
+  display: list-item;
+}
 </style>
 
 
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
 
 <!-- code folding -->
 
 
-
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -1464,8 +1487,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -1474,6 +1495,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -1492,8 +1523,8 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">spatialwidget</h1>
-<h4 class="author"><em>David Cooley</em></h4>
-<h4 class="date"><em>2019-01-18</em></h4>
+<h4 class="author">David Cooley</h4>
+<h4 class="date">2020-03-21</h4>
 
 </div>
 
@@ -1506,21 +1537,19 @@ div.tocify {
 <h1>Design</h1>
 <p>The basic idea of this package is to take an <code>sf</code> object or data.frame</p>
 <pre class="r"><code>head( widget_capitals )
-#  Simple feature collection with 6 features and 2 fields
-#  geometry type:  POINT
-#  dimension:      XY
-#  bbox:           xmin: -170.43 ymin: -14.16 xmax: 69.11 ymax: 42.31
-#  epsg (SRID):    NA
-#  proj4string:    NA
-#           country          capital               geometry
-#  1    Afghanistan            Kabul    POINT (69.11 34.28)
-#  2        Albania           Tirane    POINT (19.49 41.18)
-#  3        Algeria          Algiers     POINT (3.08 36.42)
-#  4 American Samoa        Pago Pago POINT (-170.43 -14.16)
-#  5        Andorra Andorra la Vella     POINT (1.32 42.31)
-#  6         Angola           Luanda     POINT (13.15 -8.5)</code></pre>
+#           country          capital        geometry
+#  1    Afghanistan            Kabul    69.11, 34.28
+#  2        Albania           Tirane    19.49, 41.18
+#  3        Algeria          Algiers     3.08, 36.42
+#  4 American Samoa        Pago Pago -170.43, -14.16
+#  5        Andorra Andorra la Vella     1.32, 42.31
+#  6         Angola           Luanda    13.15, -8.50</code></pre>
 <p>And convert it into pseudo-geojson ready to be parsed by javascript inside an htmlwidget</p>
-<pre class="r"><code>js &lt;- spatialwidget::widget_point( data = widget_capitals, fill_colour = &quot;country&quot;, legend = TRUE)
+<pre class="r"><code>js &lt;- spatialwidget::widget_point(
+  data = widget_capitals
+  , fill_colour = &quot;country&quot;
+  , legend = TRUE
+  )
 
 substr( js$data, 1, 200 )
 #  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#440154FF\&quot;},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#450356FF\&quot;},\&quot;geometry\&quot;:&quot;
@@ -1556,7 +1585,11 @@ substr( js$data, 1, 200 )
 <h2>Examples</h2>
 <div id="points" class="section level3">
 <h3>Points</h3>
-<pre class="r"><code>l &lt;- widget_point( widget_capitals[1:2, ], fill_colour = &quot;country&quot;, legend = T )
+<pre class="r"><code>l &lt;- widget_point(
+  widget_capitals[1:2, ]
+  , fill_colour = &quot;country&quot;
+  , legend = T
+  )
 
 substr( l$data, 1, 200 )
 #  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#440154FF\&quot;},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;fill_colour\&quot;:\&quot;#FDE725FF\&quot;},\&quot;geometry\&quot;:&quot;
@@ -1565,7 +1598,11 @@ substr( l$data, 1, 200 )
 </div>
 <div id="lines" class="section level3">
 <h3>Lines</h3>
-<pre class="r"><code>l &lt;- widget_line( widget_roads[1:2, ], stroke_colour = &quot;ROAD_NAME&quot;, legend = T )
+<pre class="r"><code>l &lt;- widget_line(
+  widget_roads[1:2, ]
+  , stroke_colour = &quot;ROAD_NAME&quot;
+  , legend = T
+  )
 
 substr( l$data, 1, 200 )
 #  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;stroke_colour\&quot;:\&quot;#440154FF\&quot;,\&quot;stroke_width\&quot;:1.0},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;LineString\&quot;,\&quot;coordinates\&quot;:[[145.014291,-37.830458],[145.014345,-37.830574],[145.01449,-&quot;
@@ -1574,10 +1611,14 @@ substr( l$data, 1, 200 )
 </div>
 <div id="polygon" class="section level3">
 <h3>Polygon</h3>
-<pre class="r"><code>l &lt;- widget_polygon( widget_melbourne[1:2, ], fill_colour = &quot;AREASQKM16&quot;, legend = F)
+<pre class="r"><code>l &lt;- widget_polygon(
+  widget_melbourne[1:2, ]
+  , fill_colour = &quot;AREASQKM16&quot;
+  , legend = F
+  )
 
 substr( l$data, 1, 200 )
-#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;stroke_colour\&quot;:\&quot;#440154FF\&quot;,\&quot;stroke_width\&quot;:1.0,\&quot;fill_colour\&quot;:\&quot;#440154FF\&quot;},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Polygon\&quot;,\&quot;coordinates\&quot;:[[[144.9925232,-37.8024902],[144.99264&quot;
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;stroke_colour\&quot;:\&quot;#440154FF\&quot;,\&quot;stroke_width\&quot;:1.0,\&quot;fill_colour\&quot;:\&quot;#440154FF\&quot;},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Polygon\&quot;,\&quot;coordinates\&quot;:[[[144.992523,-37.80249],[144.992645,-&quot;
 #  attr(,&quot;class&quot;)
 #  [1] &quot;json&quot;</code></pre>
 <hr />
@@ -1633,58 +1674,12 @@ inline Rcpp::List create_geojson(
 <p><strong>out</strong> - returns standard geojson</p>
 <hr />
 </div>
-<div id="single-sfc-column-sf-to-down-casted-geometries-in-pseudo-geojson" class="section level3">
-<h3>single-<code>sfc</code>-column <code>sf</code> to down-casted geometries in pseudo-geojson</h3>
-<pre class="cpp"><code>/*
- * expects `data` to be an sf object, where the geometry_column is a string
- * of the sfc column names (of sf) you want to use as the geometry object inside the GeoJSON.
- * This function will down-cast MULTI* objects to their single form
- *
- */
-inline Rcpp::List create_geojson_downcast(
-    Rcpp::DataFrame&amp; data,
-    Rcpp::List&amp; params,
-    Rcpp::List&amp; lst_defaults,
-    std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
-    Rcpp::StringVector&amp; layer_legend,
-    int&amp; data_rows,
-    Rcpp::StringVector&amp; parameter_exclusions,
-    std::string&amp; geometry_column,
-    bool jsonify_legend
-)</code></pre>
-<p><strong>in</strong> - <code>sf</code> object with one <code>sfc</code> column</p>
-<p><strong>out</strong> - MULTI* geometries down-cast to simpler form, in pseudo-geojson</p>
-<hr />
-</div>
-<div id="two-sfc-column-sf-to-down-casted-psuedo-geojson" class="section level3">
-<h3>two-<code>sfc</code>-column <code>sf</code> to down-casted psuedo-geojson</h3>
-<pre class="cpp"><code>  /*
-   * expects `data` to be an sf object, where the geometry_column is a string vector
-   * of the sfc column name (of sf) you want to use as the geometry object inside the GeoJSON.
-   * This function will down-cast MULTI* objects to their single form
-   *
-   */
-  inline Rcpp::List create_geojson_downcast(
-      Rcpp::DataFrame&amp; data,
-      Rcpp::List&amp; params,
-      Rcpp::List&amp; lst_defaults,
-      std::unordered_map&lt; std::string, std::string &gt;&amp; layer_colours,
-      Rcpp::StringVector&amp; layer_legend,
-      int&amp; data_rows,
-      Rcpp::StringVector&amp; parameter_exclusions,
-      Rcpp::StringVector&amp; geometry_column,
-      bool jsonify_legend
-  )</code></pre>
-<p><strong>in</strong> - <code>sf</code> object with two <code>sfc</code> columns</p>
-<p><strong>out</strong> - MULTI* geometries down-cast to simpler form, in pseudo-geojson</p>
-<hr />
-</div>
 <div id="data.frame-with-lon-lat-columns-to-pseudo-geojson" class="section level3">
 <h3><code>data.frame</code> with lon &amp; lat columns to pseudo-geojson</h3>
 <pre class="cpp"><code>/*
  * expects `data` to be data.frame withn lon &amp; lat columns. The geometry_columns
- * argument is a named list, list(myGeometry = c(&quot;lon&quot;,&quot;lat&quot;)), where 'myGeometry'
- * will be returned inside the 'geometry' object of the GeoJSON
+ * argument is a named list, list(myGeometry = c(&quot;lon&quot;,&quot;lat&quot;)), where &#39;myGeometry&#39;
+ * will be returned inside the &#39;geometry&#39; object of the GeoJSON
  */
 inline Rcpp::List create_geojson(
     Rcpp::DataFrame&amp; data,
@@ -1704,9 +1699,9 @@ inline Rcpp::List create_geojson(
 <div id="data.frame-with-lon-lat-elevation-columns-to-pseudo-geojson" class="section level3">
 <h3><code>data.frame</code> with lon, lat &amp; elevation columns to pseudo-geojson</h3>
 <pre class="cpp"><code>/*
- * expects `data` to be data.frame withn lon &amp; lat &amp; elev columns. The 'bool elevation'
- * argument must be set to 'true', and the 'geometry_columns' should contain an 'elevation'
- * value - 'geometry_column &lt;- list( geometry = c(&quot;lon&quot;,&quot;lat&quot;,&quot;elevation&quot;) )'
+ * expects `data` to be data.frame withn lon &amp; lat &amp; elev columns. The &#39;bool elevation&#39;
+ * argument must be set to &#39;true&#39;, and the &#39;geometry_columns&#39; should contain an &#39;elevation&#39;
+ * value - &#39;geometry_column &lt;- list( geometry = c(&quot;lon&quot;,&quot;lat&quot;,&quot;elevation&quot;) )&#39;
  */
 inline Rcpp::List create_geojson(
     Rcpp::DataFrame&amp; data,
@@ -1829,20 +1824,20 @@ geometry_column &lt;- c( &quot;origin&quot; )</code></pre>
 <h2>Example</h2>
 <p>Here’s an example implementation of the R, cpp and hpp files required to convert R data to pseudo-GeoJSON</p>
 <p><strong>widgetpoint.R</strong></p>
-<pre class="r"><code>#' Widget Point
-#'
-#' Converts an `sf` object with POINT geometriers into JSON for plotting in an htmlwidget
-#'
-#' @param data `sf` object with POINT geometries
-#' @param fill_colour string specifying column of `sf` to use for the fill colour
-#' @param legend logical indicating if legend data will be returned
-#' @param json_legend logical indicating if the lgend will be returned as JSON or a list
-#'
-#' @examples
-#'
-#' l &lt;- widget_point( data = capitals, fill_colour = &quot;country&quot;, legend = FALSE )
-#'
-#' @export
+<pre class="r"><code>#&#39; Widget Point
+#&#39;
+#&#39; Converts an `sf` object with POINT geometriers into JSON for plotting in an htmlwidget
+#&#39;
+#&#39; @param data `sf` object with POINT geometries
+#&#39; @param fill_colour string specifying column of `sf` to use for the fill colour
+#&#39; @param legend logical indicating if legend data will be returned
+#&#39; @param json_legend logical indicating if the lgend will be returned as JSON or a list
+#&#39;
+#&#39; @examples
+#&#39;
+#&#39; l &lt;- widget_point( data = capitals, fill_colour = &quot;country&quot;, legend = FALSE )
+#&#39;
+#&#39; @export
 widget_point &lt;- function( data,
                           fill_colour,
                           legend = TRUE,
@@ -1916,20 +1911,14 @@ namespace widgetpoint {
 <p>As well as creating pseudo-GeoJSON, most of the functions also <strong>atomise</strong> the data.</p>
 <p>When converting an <code>sf</code> object to GeoJSON it will typically create a FeatureCollection. ‘Atomising’ means it treats each row of the <code>sf</code> as it’s own Feature, and stores each one in a separate JSON object inside a JSON array (i.e., without combining them into a Feature Collection).</p>
 <p>For example, we can create a GeoJSON FeatureCollection, convert it to <code>sf</code> and back again</p>
-<pre class="r"><code>feat1 &lt;- '{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1},&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[0,0]}}'
-feat2 &lt;- '{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:2},&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[1,1]}}'
-geojson &lt;- paste0('[{&quot;type&quot;:&quot;FeatureCollection&quot;,&quot;features&quot;:[',feat1,',',feat2,']}]')
+<pre class="r"><code>feat1 &lt;- &#39;{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1},&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[0,0]}}&#39;
+feat2 &lt;- &#39;{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:2},&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[1,1]}}&#39;
+geojson &lt;- paste0(&#39;[{&quot;type&quot;:&quot;FeatureCollection&quot;,&quot;features&quot;:[&#39;,feat1,&#39;,&#39;,feat2,&#39;]}]&#39;)
 sf &lt;- geojsonsf::geojson_sf( geojson )
 sf
-#  Simple feature collection with 2 features and 1 field
-#  geometry type:  POINT
-#  dimension:      XY
-#  bbox:           xmin: 0 ymin: 0 xmax: 1 ymax: 1
-#  epsg (SRID):    4326
-#  proj4string:    +proj=longlat +datum=WGS84 +no_defs
-#    id    geometry
-#  1  1 POINT (0 0)
-#  2  2 POINT (1 1)</code></pre>
+#    id geometry
+#  1  1     0, 0
+#  2  2     1, 1</code></pre>
 <p>and going back the other way completes the round-trip and creates a FeatureCollection.</p>
 <pre class="r"><code>geo &lt;- geojsonsf::sf_geojson( sf )
 geo
@@ -1940,65 +1929,6 @@ geo
 #  {&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:2.0},&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[1.0,1.0]}}</code></pre>
 <p>This structure is useful for sending to an htmlwidget because each object in the array can be parsed independently, without having to worry about iterating or parsing the entire Featurecollection.</p>
 <p>Therefore, most of the GeoJSON functions inside spatialwidget will return the ‘atomised’ form.</p>
-</div>
-<div id="downcasting-geojson" class="section level2">
-<h2>Downcasting geojson</h2>
-<p><strong>Downcasting</strong> is the process of converting MULTI objects to their simpler form. For example, a MULTIPOINT will be down-cast to POINTs (one row/value for each of the multipoints).</p>
-<pre class="r"><code>js &lt;- '{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1,&quot;val&quot;:&quot;a&quot;},&quot;geometry&quot;:{&quot;type&quot;:&quot;MultiPoint&quot;,&quot;coordinates&quot;:[[1,4],[2,5],[3,6]]}}'
-sf &lt;- geojsonsf::geojson_sf( js )
-geo_down &lt;- spatialwidget:::rcpp_sf_to_geojson_downcast( sf, &quot;geometry&quot; )
-jsonify::pretty_json( geo_down )
-#  [
-#      {
-#          &quot;type&quot;: &quot;Feature&quot;,
-#          &quot;properties&quot;: {
-#              &quot;id&quot;: 1.0,
-#              &quot;val&quot;: &quot;a&quot;
-#          },
-#          &quot;geometry&quot;: {
-#              &quot;geometry&quot;: {
-#                  &quot;type&quot;: &quot;Point&quot;,
-#                  &quot;coordinates&quot;: [
-#                      1.0,
-#                      4.0
-#                  ]
-#              }
-#          }
-#      },
-#      {
-#          &quot;type&quot;: &quot;Feature&quot;,
-#          &quot;properties&quot;: {
-#              &quot;id&quot;: 1.0,
-#              &quot;val&quot;: &quot;a&quot;
-#          },
-#          &quot;geometry&quot;: {
-#              &quot;geometry&quot;: {
-#                  &quot;type&quot;: &quot;Point&quot;,
-#                  &quot;coordinates&quot;: [
-#                      2.0,
-#                      5.0
-#                  ]
-#              }
-#          }
-#      },
-#      {
-#          &quot;type&quot;: &quot;Feature&quot;,
-#          &quot;properties&quot;: {
-#              &quot;id&quot;: 1.0,
-#              &quot;val&quot;: &quot;a&quot;
-#          },
-#          &quot;geometry&quot;: {
-#              &quot;geometry&quot;: {
-#                  &quot;type&quot;: &quot;Point&quot;,
-#                  &quot;coordinates&quot;: [
-#                      3.0,
-#                      6.0
-#                  ]
-#              }
-#          }
-#      }
-#  ]</code></pre>
-<p>See here we started with a single MULTIPOINT (containing three coordinates), and we are returned three POINTs. Also notice the <code>id</code> and <code>val</code> fields are repeated across the new POINTs.</p>
 </div>
 </div>
 <div id="geojson-c-api" class="section level1">
@@ -2016,43 +1946,11 @@ jsonify::pretty_json( geo_down )
       Rcpp::StringVector&amp; geometries ) {</code></pre>
 <pre class="r"><code>geojson &lt;- spatialwidget:::rcpp_geojson_sf(sf = widget_arcs, geometries = c(&quot;origin&quot;,&quot;destination&quot;))
 substr( geojson, 1, 500)
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country_from&quot;:&quot;Australia&quot;,&quot;capital_from&quot;:&quot;Canberra&quot;,&quot;country_to&quot;:&quot;Afghanistan&quot;,&quot;capital_to&quot;:&quot;Kabul&quot;},&quot;geometry&quot;:{&quot;origin&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[149.08,-35.15]},&quot;destination&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country_from&quot;:&quot;Australia&quot;,&quot;capital_from&quot;:&quot;Canberra&quot;,&quot;country_to&quot;:&quot;Albania&quot;,&quot;capital_to&quot;:&quot;Tirane&quot;},&quot;geometry&quot;:{&quot;origin&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[149.08,-35.15]},&quot;destination&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordi</code></pre>
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;country_from\&quot;:\&quot;Australia\&quot;,\&quot;capital_from\&quot;:\&quot;Canberra\&quot;,\&quot;country_to\&quot;:\&quot;Afghanistan\&quot;,\&quot;capital_to\&quot;:\&quot;Kabul\&quot;},\&quot;geometry\&quot;:{\&quot;origin\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[149.08,-35.15]},\&quot;destination\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;country_from\&quot;:\&quot;Australia\&quot;,\&quot;capital_from\&quot;:\&quot;Canberra\&quot;,\&quot;country_to\&quot;:\&quot;Albania\&quot;,\&quot;capital_to\&quot;:\&quot;Tirane\&quot;},\&quot;geometry\&quot;:{\&quot;origin\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[149.08,-35.15]},\&quot;destination\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordi&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 <p><strong>in</strong> - <code>sf</code> object with one or more <code>sfc</code> columns</p>
 <p><strong>out</strong> - atomised pseudo-geojson</p>
-<hr />
-</div>
-<div id="single-sfc-column-sf-to-downcasted-atomised-pseudo-geojson" class="section level3">
-<h3>single-<code>sfc</code>-column <code>sf</code> to downcasted, atomised pseudo-geojson</h3>
-<pre><code>  // down-casts MULTIGEOMETRIES to their simpler geometry
-  // only for one-column sfc objects
-  inline Rcpp::StringVector to_geojson_downcast_atomise(
-      Rcpp::DataFrame&amp; sf,
-      std::string geometry ) {</code></pre>
-<pre class="r"><code>geojson &lt;- spatialwidget:::rcpp_sf_to_geojson_downcast( sf = widget_capitals, geometry_column = &quot;geometry&quot; )
-substr( geojson, 1, 500)
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Afghanistan&quot;,&quot;capital&quot;:&quot;Kabul&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Albania&quot;,&quot;capital&quot;:&quot;Tirane&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[19.49,41.18]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Algeria&quot;,&quot;capital&quot;:&quot;Algiers&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.08,36.42]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;American Samoa&quot;,&quot;capital&quot;:&quot;</code></pre>
-<p><strong>in</strong> - <code>sf</code> object with one <code>sfc</code> column</p>
-<p><strong>out</strong> - pseudo-geojson downcast to simpler form</p>
-<hr />
-</div>
-<div id="two-sfc-column-sf-to-downcasted-atomised-pseudo-geojson" class="section level3">
-<h3>two-<code>sfc</code>-column <code>sf</code> to downcasted, atomised pseudo-geojson</h3>
-<pre><code>  inline Rcpp::StringVector to_geojson_downcast_atomise(
-      Rcpp::DataFrame&amp; sf,
-      Rcpp::StringVector geometries )
-    {</code></pre>
-<pre class="r"><code>feat1 &lt;- '{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1},&quot;geometry&quot;:{&quot;type&quot;:&quot;MultiPoint&quot;,&quot;coordinates&quot;:[[0,0],[2,2],[4,4]]}}'
-feat2 &lt;- '{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:2},&quot;geometry&quot;:{&quot;type&quot;:&quot;MultiPoint&quot;,&quot;coordinates&quot;:[[1,1],[3,3],[5,5]]}}'
-sf1 &lt;- geojsonsf::geojson_sf( feat1 )
-sf2 &lt;- geojsonsf::geojson_sf( feat2 )
-
-sf &lt;- cbind( sf1, sf2)
-
-geojson &lt;- spatialwidget:::rcpp_sf_to_geojson_multi_column_downcast( sf = sf, geometries = c(&quot;geometry&quot;,&quot;geometry.1&quot;))
-geojson
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[0.0,0.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[1.0,1.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[2.0,2.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[1.0,1.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[4.0,4.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[1.0,1.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[0.0,0.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.0,3.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[2.0,2.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.0,3.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[4.0,4.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.0,3.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[0.0,0.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[5.0,5.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[2.0,2.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[5.0,5.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;id&quot;:1.0,&quot;id.1&quot;:2.0},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[4.0,4.0]},&quot;geometry.1&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[5.0,5.0]}}}]</code></pre>
-<p><strong>in</strong> - <code>sf</code> object with two <code>sfc</code> columns</p>
-<p><strong>out</strong> - pseudo-geojson down-cast to simpler form. It will repeat the other columns to the correct length.</p>
 <hr />
 </div>
 <div id="single-sfc-column-sf-to-standard-geojson-1" class="section level3">
@@ -2060,7 +1958,9 @@ geojson
 <pre><code>inline Rcpp::StringVector to_geojson( Rcpp::DataFrame&amp; sf, std::string geom_column )</code></pre>
 <pre class="r"><code>geojson &lt;- spatialwidget:::rcpp_geojson( sf = widget_capitals, geometry = &quot;geometry&quot;)
 substr( geojson, 1, 300)
-#  {&quot;type&quot;:&quot;FeatureCollection&quot;,&quot;features&quot;:[{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Afghanistan&quot;,&quot;capital&quot;:&quot;Kabul&quot;},&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28]}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Albania&quot;,&quot;capital&quot;:&quot;Tirane&quot;},&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[19.49,41.18]}}</code></pre>
+#  [1] &quot;{\&quot;type\&quot;:\&quot;FeatureCollection\&quot;,\&quot;features\&quot;:[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;country\&quot;:\&quot;Afghanistan\&quot;,\&quot;capital\&quot;:\&quot;Kabul\&quot;},\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28]}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;country\&quot;:\&quot;Albania\&quot;,\&quot;capital\&quot;:\&quot;Tirane\&quot;},\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[19.49,41.18]}}&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 <p><strong>in</strong> - <code>sf</code> object with one <code>sfc</code> column</p>
 <p><strong>out</strong> - standard GeoJSON</p>
 <hr />
@@ -2071,14 +1971,13 @@ substr( geojson, 1, 300)
       Rcpp::DataFrame&amp; df,
       Rcpp::List&amp; geometries ) // i.e., list(origin = c(&quot;start_lon&quot;, &quot;start_lat&quot;, destination = c(&quot;end_lon&quot;, &quot;end_lat&quot;)))
   {</code></pre>
-<pre class="r"><code>df &lt;- as.data.frame( widget_capitals )
-coords &lt;- sf::st_coordinates( widget_capitals )
-df[, c(&quot;lon&quot;,&quot;lat&quot;)] &lt;- coords
-df$geometry &lt;- NULL
+<pre class="r"><code>df &lt;- sfheaders::sf_to_df( widget_capitals )
 
-geojson &lt;- spatialwidget:::rcpp_geojson_df(df = df, list(geometry = c(&quot;lon&quot;,&quot;lat&quot;)) )
+geojson &lt;- spatialwidget:::rcpp_geojson_df(df = df, list(geometry = c(&quot;x&quot;,&quot;y&quot;)) )
 substr( geojson, 1, 500 )
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Afghanistan&quot;,&quot;capital&quot;:&quot;Kabul&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Albania&quot;,&quot;capital&quot;:&quot;Tirane&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[19.49,41.18]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Algeria&quot;,&quot;capital&quot;:&quot;Algiers&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.08,36.42]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;American Samoa&quot;,&quot;capital&quot;:&quot;</code></pre>
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:1,\&quot;point_id\&quot;:1},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:2,\&quot;point_id\&quot;:2},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[19.49,41.18]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:3,\&quot;point_id\&quot;:3},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[3.08,36.42]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:4,\&quot;point_id\&quot;:4},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[-170.43,&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 <p><strong>in</strong> - <code>data.frame</code> with lon &amp; lat columns</p>
 <p><strong>out</strong> - pseudo-GeoJSON atomised</p>
 <hr />
@@ -2091,9 +1990,11 @@ substr( geojson, 1, 500 )
       Rcpp::List&amp; geometries ) // i.e., list(origin = c(&quot;start_lon&quot;, &quot;start_lat&quot;, destination = c(&quot;end_lon&quot;, &quot;end_lat&quot;)))
   {</code></pre>
 <pre class="r"><code>df$z &lt;- sample(1:500, size = nrow(df), replace = TRUE )
-geojson &lt;- spatialwidget:::rcpp_geojson_dfz( df, geometries = list(geometry = c(&quot;lon&quot;,&quot;lat&quot;,&quot;z&quot;) ) )
+geojson &lt;- spatialwidget:::rcpp_geojson_dfz( df, geometries = list(geometry = c(&quot;x&quot;,&quot;y&quot;,&quot;z&quot;) ) )
 substr( geojson, 1, 500 )
-#  [{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Afghanistan&quot;,&quot;capital&quot;:&quot;Kabul&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[69.11,34.28,288.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Albania&quot;,&quot;capital&quot;:&quot;Tirane&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[19.49,41.18,447.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;Algeria&quot;,&quot;capital&quot;:&quot;Algiers&quot;},&quot;geometry&quot;:{&quot;geometry&quot;:{&quot;type&quot;:&quot;Point&quot;,&quot;coordinates&quot;:[3.08,36.42,200.0]}}},{&quot;type&quot;:&quot;Feature&quot;,&quot;properties&quot;:{&quot;country&quot;:&quot;American</code></pre>
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:1,\&quot;point_id\&quot;:1},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28,4.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:2,\&quot;point_id\&quot;:2},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[19.49,41.18,365.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:3,\&quot;point_id\&quot;:3},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[3.08,36.42,395.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:4,\&quot;point_id\&quot;:4},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordi&quot;
+#  attr(,&quot;class&quot;)
+#  [1] &quot;json&quot;</code></pre>
 <p><strong>in</strong> - <code>data.frame</code> with lon, lat and elevation columns</p>
 <p><strong>out</strong> - pseudo-GeoJSON atomised</p>
 </div>
@@ -2117,6 +2018,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

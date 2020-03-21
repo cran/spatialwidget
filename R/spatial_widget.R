@@ -11,19 +11,22 @@
 #' or a single value to apply to all rows of data
 #' @param legend logical indicating if legend data will be returned
 #' @param json_legend logical indicating if the legend will be returned as json
-#'
+#' @param digits number of decimal places for rounding lon o& lat coordinates. Default 6
 #' @examples
 #'
 #' ## use default stroke options
 #' l <- widget_line( widget_roads, legend = TRUE )
 #'
 #' @export
-widget_line <- function( data,
-                         stroke_colour = NULL,
-                         stroke_opacity = NULL,
-                         stroke_width = NULL,
-                         legend = TRUE,
-                         json_legend = TRUE) {
+widget_line <- function(
+  data,
+  stroke_colour = NULL,
+  stroke_opacity = NULL,
+  stroke_width = NULL,
+  legend = TRUE,
+  json_legend = TRUE,
+  digits = 6
+  ) {
 
   l <- as.list( match.call( expand.dots = F) )
   l[[1]] <- NULL
@@ -42,7 +45,7 @@ widget_line <- function( data,
   }
   l[["data_type"]] <- NULL
 
-  js_data <- rcpp_widget_line( data, l, c("geometry"), json_legend  )
+  js_data <- rcpp_widget_line( data, l, c("geometry"), json_legend, digits  )
   return( js_data )
 }
 
@@ -63,14 +66,17 @@ widget_line <- function( data,
 #' l <- widget_polygon( widget_melbourne, fill_colour = "AREASQKM16", legend = TRUE )
 #'
 #' @export
-widget_polygon <- function( data,
-                            stroke_colour = NULL,
-                            stroke_opacity = NULL,
-                            stroke_width = NULL,
-                            fill_colour = NULL,
-                            fill_opacity = NULL,
-                            legend = TRUE,
-                            json_legend = TRUE ) {
+widget_polygon <- function(
+  data,
+  stroke_colour = NULL,
+  stroke_opacity = NULL,
+  stroke_width = NULL,
+  fill_colour = NULL,
+  fill_opacity = NULL,
+  legend = TRUE,
+  json_legend = TRUE,
+  digits = 6
+  ) {
 
   l <- as.list( match.call( expand.dots = F ) )
   l[[1]] <- NULL
@@ -91,7 +97,7 @@ widget_polygon <- function( data,
   }
   l[["data_type"]] <- NULL
 
-  js_data <- rcpp_widget_polygon( data, l, c("geometry"), json_legend )
+  js_data <- rcpp_widget_polygon( data, l, c("geometry"), json_legend, digits )
   return( js_data )
 }
 
@@ -111,13 +117,16 @@ widget_polygon <- function( data,
 #' l <- widget_point( data = widget_capitals, legend = FALSE )
 #'
 #' @export
-widget_point <- function( data,
-                          fill_colour = NULL,
-                          fill_opacity = NULL,
-                          lon = NULL,
-                          lat = NULL,
-                          legend = TRUE,
-                          json_legend = TRUE ) {
+widget_point <- function(
+  data,
+  fill_colour = NULL,
+  fill_opacity = NULL,
+  lon = NULL,
+  lat = NULL,
+  legend = TRUE,
+  json_legend = TRUE,
+  digits = 6
+  ) {
 
   l <- as.list( match.call( expand.dots = F ) )
   l[[1]] <- NULL
@@ -140,17 +149,90 @@ widget_point <- function( data,
   l[["data_type"]] <- NULL
 
   if( tp == "sf" ) {
-    js_data <- rcpp_widget_point( data, l, c("geometry"), json_legend )
+    js_data <- rcpp_widget_point( data, l, c("geometry"), json_legend, digits )
   } else if (tp == "df" ) {
     if( is.null( lon ) || is.null( lat ) ) {
       stop("lon and lat are requried for data.frames")
     }
     js_data <- rcpp_widget_point_df(
-      data, l, list(myGeometry = c("lon","lat") ), json_legend
+      data, l, list(myGeometry = c("lon","lat") ), json_legend, digits
       )
   }
   return( js_data )
 }
+
+
+## columnar design:
+## - dadta.frame. Specify lon, lat, geometries (origin, destinatin, other)
+## - if it's an 'sf' object, it will go to rcpp_sf_columnar()
+## -- get dimension, and turn into a data.frame with 'x', 'y', 'z', 'm'
+## -- IF xy, stride = 2, if xyz ,stried = 3, if xyzm, stride = 4
+## -- (plus other stried caused by colour etc)
+
+## If I'm going to use the binary data structure suggested by deck.gl
+##  // lon1, lat1, radius1, red1, green1, blue1, lon2, lat2, ...
+## const binaryData = new Float32Array([-122.4, 37.78, 1000, 255, 200, 0, -122.41, 37.775, 500, 200, 0, 0, -122.39, 37.8, 500, 0, 40, 200]);
+##
+## Then maybe I acutally should use
+## const lon = new Float32Array([])
+## const lat = new Float32Array([])
+## const fill_colour = new Float32Array([])
+## const ...
+## then the fill_colours will stried 4 (r,g,b,a)
+## the geometries will stried 2/3/4 (xy/z/m) + number_coordinates in a geometry
+##
+## and create a
+## const DATA = {
+##  srcLon: lon, length: lon.length / stride (1??),
+##  srcLat: lat, length:
+## }
+
+# widget_point_columnar <- function(
+#   data,
+#   fill_colour = NULL,
+#   fill_opacity = NULL,
+#   lon = NULL,
+#   lat = NULL,
+#   legend = TRUE,
+#   json_legend = TRUE,
+#   digits = 6
+# ) {
+#
+#   l <- as.list( match.call( expand.dots = F ) )
+#   l[[1]] <- NULL
+#   l[["data"]] <- NULL
+#   l[["json_legend"]] <- NULL
+#   l[["lon"]] <- force( lon )
+#   l[["lat"]] <- force( lat )
+#   l[["fill_colour"]] <- force( fill_colour )
+#   l[["fill_opacity"]] <- force( fill_opacity )
+#
+#   l <- resolve_legend( l, legend )
+#   l <- resolve_data( data, l, "POINT" )
+#
+#   if( !is.null( l[["data"]] ) ) {
+#     data <- l[["data"]]
+#     l[["data"]] <- NULL
+#   }
+#
+#   tp <- l[["data_type"]]
+#   l[["data_type"]] <- NULL
+#
+#   if( tp == "sf" ) {
+#     js_data <- rcpp_widget_point_sf_columnar( data, l, list( myGeometry = c("x","y") ), json_legend, digits )
+#   } else if (tp == "df" ) {
+#     if( is.null( lon ) || is.null( lat ) ) {
+#       stop("lon and lat are requried for data.frames")
+#     }
+#
+#     # print( data )
+#
+#     js_data <- rcpp_widget_point_df_columnar(
+#       data, l, list( myGeometry = c("x","y") ), json_legend, digits
+#     )
+#   }
+#   return( js_data )
+# }
 
 
 #' Widget OD
@@ -166,13 +248,16 @@ widget_point <- function( data,
 #' l <- widget_od( data = widget_arcs, origin = "origin", destination = "destination", legend = FALSE )
 #'
 #' @export
-widget_od <- function( data,
-                       origin,
-                       destination,
-                       fill_colour = NULL,
-                       fill_opacity = NULL,
-                       legend = TRUE,
-                       json_legend = TRUE ) {
+widget_od <- function(
+  data,
+  origin,
+  destination,
+  fill_colour = NULL,
+  fill_opacity = NULL,
+  legend = TRUE,
+  json_legend = TRUE,
+  digits = 6
+  ) {
 
   l <- as.list( match.call( expand.dots = F ) )
   l[[1]] <- NULL
@@ -190,7 +275,7 @@ widget_od <- function( data,
   tp <- l[["data_type"]]
   l[["data_type"]] <- NULL
 
-  js_data <- rcpp_widget_point( data, l, c("origin","destination"), json_legend )
+  js_data <- rcpp_widget_point( data, l, c("origin","destination"), json_legend, digits )
 
   return( js_data )
 }
@@ -242,7 +327,7 @@ resolve_data.data.frame <- function( data, l, sf_geom ) {
   if( sf_geom != "POINT") {
     stop("only POINTS are supported for data.frames")
   }
-  l[["geometry"]] <- c( l[["lon"]], l[["lat"]] )
+  ## l[["geometry"]] <- c( l[["lon"]], l[["lat"]] )
   l[["data"]] <- data
   l[["data_type"]] <- "df"
   return( l )
