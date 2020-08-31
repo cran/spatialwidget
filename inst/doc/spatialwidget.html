@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 <meta name="author" content="David Cooley" />
 
-<meta name="date" content="2020-03-21" />
+<meta name="date" content="2020-08-31" />
 
 <title>spatialwidget</title>
 
@@ -1424,6 +1423,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -1452,6 +1452,12 @@ summary {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -1524,7 +1530,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">spatialwidget</h1>
 <h4 class="author">David Cooley</h4>
-<h4 class="date">2020-03-21</h4>
+<h4 class="date">2020-08-31</h4>
 
 </div>
 
@@ -1992,7 +1998,7 @@ substr( geojson, 1, 500 )
 <pre class="r"><code>df$z &lt;- sample(1:500, size = nrow(df), replace = TRUE )
 geojson &lt;- spatialwidget:::rcpp_geojson_dfz( df, geometries = list(geometry = c(&quot;x&quot;,&quot;y&quot;,&quot;z&quot;) ) )
 substr( geojson, 1, 500 )
-#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:1,\&quot;point_id\&quot;:1},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28,4.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:2,\&quot;point_id\&quot;:2},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[19.49,41.18,365.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:3,\&quot;point_id\&quot;:3},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[3.08,36.42,395.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:4,\&quot;point_id\&quot;:4},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordi&quot;
+#  [1] &quot;[{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:1,\&quot;point_id\&quot;:1},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[69.11,34.28,451.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:2,\&quot;point_id\&quot;:2},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[19.49,41.18,2.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:3,\&quot;point_id\&quot;:3},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordinates\&quot;:[3.08,36.42,419.0]}}},{\&quot;type\&quot;:\&quot;Feature\&quot;,\&quot;properties\&quot;:{\&quot;sfg_id\&quot;:4,\&quot;point_id\&quot;:4},\&quot;geometry\&quot;:{\&quot;geometry\&quot;:{\&quot;type\&quot;:\&quot;Point\&quot;,\&quot;coordi&quot;
 #  attr(,&quot;class&quot;)
 #  [1] &quot;json&quot;</code></pre>
 <p><strong>in</strong> - <code>data.frame</code> with lon, lat and elevation columns</p>
