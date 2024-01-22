@@ -1,3 +1,13 @@
+# v0.2.5
+
+* changed to MIT license
+* removed C++11 system requirements
+* Replaced `std::regex_match` in `is_hex()` due to crashes on Windows [issue 359](https://github.com/SymbolixAU/mapdeck/issues/359)
+
+# v0.2.4
+
+* create_interleaved() C++ function for formatting interleaved objects
+
 # v0.2.3
 
 * Links to geometries
